@@ -23,7 +23,7 @@
                     <div class="md-subhead">{{ savedUrl }}</div>
                 </md-card-header>
                 <md-card-actions>
-                    <md-button @click="openUrl(shortUrl)" >Open URL</md-button>
+                    <md-button @click="openUrl(shortUrl)">Open URL</md-button>
                     <md-button v-clipboard:copy="shortUrl" v-clipboard:success="shortUrlCopied">
                         Copy URL
                     </md-button>
@@ -38,30 +38,32 @@
             <md-table-card>
                 <md-toolbar>
                     <h1 class="md-title">Links</h1>
+                    <md-button class="md-icon-button" @click="fetchHistory">
+                        <md-icon>refresh</md-icon>
+                    </md-button>
                 </md-toolbar>
     
-                <!--<md-table md-sort="visitDate" md-sort-type="desc" @select="onSelect" @sort="onSort">-->
-                <md-table md-sort="visitDate" md-sort-type="desc">
+                <md-table md-sort="dateAccessed" md-sort-type="desc">
                     <md-table-header>
                         <md-table-row>
-                            <md-table-head md-sort-by="shortcode">ShortCode</md-table-head>
-                            <md-table-head md-sort-by="longUrl">Long URL</md-table-head>
-                            <md-table-head md-sort-by="userAgent">User Agent</md-table-head>
-                            <md-table-head md-sort-by="visitDate">Last Visit</md-table-head>
+                            <md-table-head>ShortCode</md-table-head>
+                            <md-table-head>Long URL</md-table-head>
+                            <md-table-head>User Agent</md-table-head>
+                            <md-table-head>IP Address</md-table-head>
+                            <md-table-head>Last Visit</md-table-head>
                         </md-table-row>
                     </md-table-header>
     
                     <md-table-body>
-                        <md-table-row v-for="(row, rowIndex) in analytics" :key="rowIndex" :md-item="row" md-auto-select md-selection>
-                            <md-table-cell v-for="(column, columnIndex) in row" :key="columnIndex" :md-numeric="columnIndex !== 'visitDate'" v-if="columnIndex !== 'type'">
-                                {{ column }}
+                        <md-table-row v-for="(row, rowIndex) in analytics" :key="rowIndex">
+                            <md-table-cell v-for="(column, columnIndex) in row" :key="columnIndex">
+                                <span v-if="columnIndex === 'dateAccessed'">{{ column | formatDate }}</span>
+                                <span v-else>{{ column }}</span>
                             </md-table-cell>
                         </md-table-row>
                     </md-table-body>
                 </md-table>
     
-                <!--<md-table-pagination md-size="5" md-total="10" md-page="1" md-label="Rows" md-separator="of" :md-page-options="[5, 10, 25, 50]"></md-table-pagination>-->
-                <!--<md-table-pagination md-size="5" md-total="10" md-page="1" md-label="Rows" md-separator="of" :md-page-options="[5, 10, 25, 50]" @pagination="onPagination"></md-table-pagination>-->
             </md-table-card>
         </div>
     </div>
@@ -71,7 +73,7 @@
 import axios from 'axios';
 
 var config = {
-  headers: {'Content-Type': 'application/json; charset=utf-8'}
+    headers: { 'Content-Type': 'application/json; charset=utf-8' }
 };
 
 export default {
@@ -107,7 +109,18 @@ export default {
                 .catch(e => {
                     console.log(e);
                 })
-        }
+        },
+        fetchHistory() {
+            axios
+                .get(`http://u.lydialim.com/api/history`, config)
+                .then(response => {
+                    this.analytics = response.data;
+                    console.log(this.analytics);
+                })
+                .catch(e => {
+                    console.log(e);
+                })
+        },
     }
 }
 </script>
