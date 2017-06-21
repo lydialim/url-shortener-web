@@ -30,7 +30,7 @@
                 </md-card-actions>
             </md-card>
             <md-snackbar md-position="top center" ref="snackbar" md-duration="4000">
-                <span>Copied</span>
+                <span>URL Copied</span>
             </md-snackbar>
     
             <br />
@@ -38,8 +38,11 @@
             <md-table-card>
                 <md-toolbar>
                     <h1 class="md-title">Links</h1>
-                    <md-button class="md-icon-button" @click="fetchHistory">
-                        <md-icon>refresh</md-icon>
+                    <md-button class="md-icon-button" v-show="!fetching" @click="fetchHistory">
+                            <md-icon md-iconset="fa fa-refresh"></md-icon>
+                        </md-button>
+                    <md-button class="md-icon-button" v-show="fetching">
+                        <md-icon md-iconset="fa fa-refresh fa-spin"></md-icon>
                     </md-button>
                 </md-toolbar>
     
@@ -80,6 +83,7 @@ export default {
     name: 'app',
     data: () => ({
         shortUrlCreated: false,
+        fetching: false,
         originalUrl: '',
         shortUrl: '',
         savedUrl: '',
@@ -111,13 +115,17 @@ export default {
                 })
         },
         fetchHistory() {
+            this.fetching = true;
+
             axios
                 .get(`http://u.lydialim.com/api/history`, config)
                 .then(response => {
                     this.analytics = response.data;
-                    console.log(this.analytics);
+                    this.fetching = false;
+                    console.log("Data refreshed.");
                 })
                 .catch(e => {
+                    this.fetching = false;
                     console.log(e);
                 })
         },
@@ -125,13 +133,15 @@ export default {
 }
 </script>
 
-<<style lang="scss">
+<style lang="scss">
 .urly-page-header {
     margin: 8px;
 }
+
 .urly-page-content {
     padding: 10px;
 }
+
 .urly-form {
     margin-left: 8px;
 }
