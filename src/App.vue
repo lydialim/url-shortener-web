@@ -17,6 +17,7 @@
         </md-whiteframe>
     
         <div class="urly-page-content">
+            <md-progress class="md-warn" md-indeterminate v-if="shorteningInProgress"></md-progress>
             <md-card v-if="shortUrlCreated">
                 <md-card-header>
                     <div class="md-title">{{ shortUrl }}</div>
@@ -39,8 +40,8 @@
                 <md-toolbar>
                     <h1 class="md-title">Links</h1>
                     <md-button class="md-icon-button" v-show="!fetching" @click="fetchHistory">
-                            <md-icon md-iconset="fa fa-refresh"></md-icon>
-                        </md-button>
+                        <md-icon md-iconset="fa fa-refresh"></md-icon>
+                    </md-button>
                     <md-button class="md-icon-button" v-show="fetching">
                         <md-icon md-iconset="fa fa-refresh fa-spin"></md-icon>
                     </md-button>
@@ -83,6 +84,7 @@ export default {
     name: 'app',
     data: () => ({
         shortUrlCreated: false,
+        shorteningInProgress: false,
         fetching: false,
         originalUrl: '',
         shortUrl: '',
@@ -101,9 +103,12 @@ export default {
                 return;
             }
 
+            this.shorteningInProgress = true;
+
             axios
                 .post(`http://u.lydialim.com/api/create`, { url: longUrl }, config)
                 .then(response => {
+                    this.shorteningInProgress = false;
                     if (response.status === 201) {
                         this.shortUrl = `http://u.lydialim.com/${response.data}`;
                         this.shortUrlCreated = true;
@@ -111,6 +116,7 @@ export default {
                     }
                 })
                 .catch(e => {
+                    this.shorteningInProgress = false;
                     console.log(e);
                 })
         },
